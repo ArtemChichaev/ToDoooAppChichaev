@@ -1,0 +1,175 @@
+﻿<Window
+    x:Class="ToDooo.UI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ToDooo.UI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="w"
+    Title="MainWindow"
+    Width="700"
+    Height="450"
+    d:Width="700"
+    mc:Ignorable="d">
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="bg_color" Color="#55D7F1FA" />
+        <SolidColorBrush x:Key="border_color" Color="AntiqueWhite" />
+        <SolidColorBrush x:Key="selected_color" Color="#DC372AC3" />
+
+        <Style x:Key="buttonsStyle" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStop Offset="0.5" Color="AliceBlue" />
+                            <GradientStop Offset="1" Color="#FFC0DEFF" />
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+    </Window.Resources>
+    <DockPanel
+        Grid.Column="1"
+        Margin="0,20,0,0"
+        Background="{StaticResource bg_color}">
+
+        <StackPanel
+            Margin="10"
+            HorizontalAlignment="Left"
+            DockPanel.Dock="Right">
+            <Button Click="Button_Click" Style="{StaticResource buttonsStyle}">
+                <Image
+                    Width="25"
+                    Height="25"
+                    DockPanel.Dock="Bottom"
+                    Source="assets/add.png" />
+            </Button>
+        </StackPanel>
+
+        <TabControl
+            x:Name="t"
+            d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
+                                             Type={x:Type local:DesignTimeData}}"
+            DataContext="{Binding ElementName=w, Path=DataContext}"
+            TabStripPlacement="Left">
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ListView
+                        Margin="100,20,0,0"
+                        HorizontalAlignment="Left"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ItemsSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TabControl}, Path=SelectedItem.DataContext}">
+                        <ListView.Resources>
+                            <Style x:Key="disabled" TargetType="ContentControl">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Deleted}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.Resources>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border
+                                        Padding="5"
+                                        BorderBrush="{StaticResource selected_color}"
+                                        BorderThickness="1"
+                                        CornerRadius="5">
+
+                                        <Grid Height="40" VerticalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100*" MinWidth="200" />
+                                                <ColumnDefinition />
+                                                <ColumnDefinition />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Name}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsFinished}" Value="True">
+                                                                <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <CheckBox
+                                                Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Checked="CheckBox_Checked"
+                                                IsChecked="{Binding IsFinished, Mode=OneWay}"
+                                                Style="{StaticResource disabled}"
+                                                Unchecked="CheckBox_Checked" />
+                                        </Grid>
+
+                                    </Border>
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="20"
+                                        Height="20"
+                                        Margin="15,0,5,0"
+                                        Click="DeleteButtonClick">
+                                        <Button.Style>
+                                            <Style BasedOn="{StaticResource buttonsStyle}" TargetType="Button">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Deleted}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <Image Source="assets/delete.png" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="{StaticResource bg_color}" />
+                    <Setter Property="Padding" Value="10" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="red" />
+                            <Setter Property="HeaderTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="{StaticResource selected_color}" Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Content}" />
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
+            <TabItem
+                DataContext="{Binding PlannedToDoItems}"
+                Header="Запланированные"
+                IsSelected="True"
+                Tag="1" />
+            <TabItem
+                DataContext="{Binding FinishedToDoItems}"
+                Header="Выполненные"
+                Tag="2" />
+
+            <TabItem
+                DataContext="{Binding DeletedToDoItems}"
+                Header="Удалённые"
+                Tag="3" />
+        </TabControl>
+
+    </DockPanel>
+
+</Window>
